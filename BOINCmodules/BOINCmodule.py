@@ -48,7 +48,7 @@ except:
 class TASK_ITEM:
     """An object to store Task details."""
     def __init__(self, item_id):
-        uuid = item_id
+        self.uuid = item_id
         self.params = {
         "name" : "",
         "WU name" : "",
@@ -81,30 +81,54 @@ class TASK_ITEM:
         # reads params dictionary
         return(self.params[name])
 
+    def get_all_params_labels(self):
+        Task_Param_Labels = [ "name", "WU name", "project URL", "received", "report deadline", "ready to report",
+                "got server ack", "final CPU time", "state", "scheduler state", "exit_status", "signal", "suspended via GUI",
+                "active_task_state", "app version num", "checkpoint CPU time", "current CPU time", "fraction done",
+                "swap size", "working set size", "estimated CPU time remaining" ]
+        return(Task_Param_Labels)
+
     def print(self):
-        pass
+        for k in self.get_all_params_labels():
+            print(k +": "+ str(self.get_params_value(k)))
+        print("")
+
 
     def reset_task(self):
         # Pause then resume the task
         #./boinccmd --task http://setiathome.berkeley.edu/ blc23_2bit_guppi_58405_84300_HIP86137_0023.6158.0.22.45.76.vlar_0 suspend
         #./boinccmd --task http://setiathome.berkeley.edu/ blc23_2bit_guppi_58405_84300_HIP86137_0023.6158.0.22.45.76.vlar_0 resume
+        pass
+
 
 class TASK_LIST:
     """A list of TASK_ITEMS indexed with uuid."""
     def __init__(self):
         self.list = {}
 
-    def get_task_list(self):
+    def read_task_list(self):
         """ This method should be the first called to popultate the list of tasks.
         """
+        task_flag = False
+        new_task = False
         boinccmd  = os.path.join(env.gut_const.BOINC_HOME, "boinccmd")
         task_list = subprocess.check_output(shlex.split(boinccmd + ' --get_simple_gui_info'), shell=False,
                 stderr=subprocess.DEVNULL).decode().split("\n")
         for task_line in task_list:
+            if task_flag == False:
+                if task_line[:14] == "======== Tasks":
+                    task_flag = True
+                continue
 
-            task_item = TASK_ITEM(uuid4().hex)
-            task_item.set_params_value("name",  value)
-            self.list[task_item.uuid] = task_item
+            stask_line = task_line.strip()
+            if re.fullmatch(r'[0-9]+\).*', task_line):
+                new_task = True
+                task_item = TASK_ITEM(uuid4().hex)
+                self.list[task_item.uuid] = task_item
+                continue
+            task_items = stask_line.split(': ')
+            if len(task_items) == 2:
+                task_item.set_params_value(task_items[0],  task_items[1])
 
     def print(self):
         for k, v in self.list.items():
@@ -116,7 +140,8 @@ def test():
 
 
     task_list = TASK_LIST()
-    print(task_list.list)
+    task_list.read_task_list()
+    task_list.print()
     exit()
 
 
