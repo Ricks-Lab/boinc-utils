@@ -98,19 +98,26 @@ class TASK_ITEM:
         # Pause then resume the task
         #./boinccmd --task http://setiathome.berkeley.edu/ blc23_2bit_guppi_58405_84300_HIP86137_0023.6158.0.22.45.76.vlar_0 suspend
         #./boinccmd --task http://setiathome.berkeley.edu/ blc23_2bit_guppi_58405_84300_HIP86137_0023.6158.0.22.45.76.vlar_0 resume
+        cwd = os.getcwd()
+        os.chdir(env.gut_const.BOINC_HOME)
         boinccmd  = os.path.join(env.gut_const.BOINC_HOME, "boinccmd") + " --task " + self.get_params_value("project URL") + " " + self.get_params_value("name") 
         try:
             cmd = subprocess.Popen(shlex.split(boinccmd + " suspend"), shell=False, stderr=subprocess.DEVNULL)
             output = cmd.stdout.read()
             cmd.stdout.close()
             cmd.wait()
+        except:
+            print("Error: could not execute boinccmd: %s suspend" % boinccmd)
+        try:
+            sleep(2)
             cmd = subprocess.Popen(shlex.split(boinccmd + " resume"), shell=False, stderr=subprocess.DEVNULL)
             output = cmd.stdout.read()
             cmd.stdout.close()
             cmd.wait()
         except:
-            print("Error: could not execute boinccmd: %s", boinccmd)
+            print("Error: could not execute boinccmd: %s resume" % boinccmd)
         return
+        os.chdir(cwd)
 
 
 class TASK_LIST:
@@ -157,8 +164,9 @@ class TASK_LIST:
             tm1 = t_minus1.get_fd_for_wu(wu)
             fd = v.get_params_value("fraction done")
             if tm1 == fd:
-                print("%s: Hung Task: %s, fraction done: %s, app: %s" %
-                        t.strftime('%m%d_%H%M%S'), wu, fd, v.get_params_value("app version num"))
+                t = datetime.utcnow()
+                print("%s: Hung Task: %s, fraction done: %s, app: %s" % ( str(t.strftime('%m%d_%H%M%S')), wu, str(fd), str(v.get_params_value("app version num"))))
+                #print("%s: Hung Task: %s, fraction done: %s" % (str(t.strftime('%m%d_%H%M%S')), wu, fd ))
                 v.uhang_task()
 
     def print(self):
