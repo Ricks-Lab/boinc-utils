@@ -47,7 +47,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--about", help="README", action="store_true", default=False)
     parser.add_argument("--log", help="Write all actions to logfile", action="store_true", default=False)
-    parser.add_argument("--sleep", help="Number of seconds to sleep between checks", type=int, default=5)
+    parser.add_argument("--sleep", help="Number of seconds to sleep between checks", type=int, default=env.gut_const.SLEEP)
     parser.add_argument("-d", "--debug", help="Debug output", action="store_true", default=False)
     args = parser.parse_args()
 
