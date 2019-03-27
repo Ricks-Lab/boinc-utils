@@ -94,11 +94,16 @@ class TASK_ITEM:
         print("")
 
 
-    def reset_task(self):
+    def uhang_task(self):
         # Pause then resume the task
         #./boinccmd --task http://setiathome.berkeley.edu/ blc23_2bit_guppi_58405_84300_HIP86137_0023.6158.0.22.45.76.vlar_0 suspend
         #./boinccmd --task http://setiathome.berkeley.edu/ blc23_2bit_guppi_58405_84300_HIP86137_0023.6158.0.22.45.76.vlar_0 resume
-        pass
+        boinccmd  = os.path.join(env.gut_const.BOINC_HOME, "boinccmd") + " --task " + self.get_params_value("project URL") + " " + v.get_params_value("name") 
+        cmd = subprocess.check_output(shlex.split(boinccmd + " suspend"), shell=False, stderr=subprocess.DEVNULL)
+        cmd.wait()
+        cmd = subprocess.check_output(shlex.split(boinccmd + " resume"), shell=False, stderr=subprocess.DEVNULL)
+        cmd.wait()
+        return
 
 
 class TASK_LIST:
@@ -129,6 +134,23 @@ class TASK_LIST:
             task_items = stask_line.split(': ')
             if len(task_items) == 2:
                 task_item.set_params_value(task_items[0],  task_items[1])
+
+    def get_fd_for_wu(self, wu):
+        for k, v in self.list.items():
+            if v.get_params_value("WU name") == wu:
+                return(v.get_params_value("fraction done"))
+
+    def find_hung_task(self, t_minus1):
+        for k, v in self.list.items():
+            if v.get_params_value("active_task_state") != "EXECUTING":
+                continue
+            if float(v.get_params_value("fraction done")) < 0.00002:
+                continue
+            wu = v.get_params_value("WU name")
+            tm1 = t_minus1.get_fd_for_wu(wu)
+            if tm1 == v.get_params_value("fraction done"):
+                print("Hung Task: ", wu)
+                v.uhang_task()
 
     def print(self):
         for k, v in self.list.items():
