@@ -173,8 +173,9 @@ class TASK_LIST:
             fd = v.get_params_value("fraction done")
             if tm1 == fd:
                 t = datetime.now()
-                print("%s: Hung Task: %s, fraction done: %s, app: %s" % ( str(t.strftime('%m%d_%H%M%S')), wu, str(fd), str(v.get_params_value("app version num"))))
-                #print("%s: Hung Task: %s, fraction done: %s" % (str(t.strftime('%m%d_%H%M%S')), wu, fd ))
+                print("%s: Hung Task: %s, fraction done: %s, app: %s" %
+                    (str(t.strftime('%m%d_%H%M%S')), wu, str(fd), str(v.get_params_value("app version num"))),
+                    file=env.gut_const.log_file_ptr)
                 v.uhang_task()
 
     def print(self):

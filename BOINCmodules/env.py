@@ -49,7 +49,7 @@ class GUT_CONST:
         self.log_file_ptr = ""
         self.show_fans = True
         self.write_delta_only = False
-        self.SLEEP = 8
+        self.SLEEP = 30
         self.PATH = "."
         self.amdfeaturemask = ""
 
